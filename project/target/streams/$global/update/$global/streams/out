@@ -6533,7 +6533,7 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#template-resolver;0.1!template-resolver.jar
 [debug] 	[NOT REQUIRED] org.scala-lang#jline;2.10.7!jline.jar
 [debug] 	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar
-[debug] :: resolution report :: resolve 849ms :: artifacts dl 22ms
+[debug] :: resolution report :: resolve 1367ms :: artifacts dl 57ms
 [debug] 	report for default#beleg1_aufgabe-build;0.1-SNAPSHOT compile produced in /Users/konstantinkochetov/Other/StudentStuff/Scala2/4/Beleg1_Aufgabe/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-beleg1_aufgabe-build-compile.xml
 [debug] 	report for default#beleg1_aufgabe-build;0.1-SNAPSHOT runtime produced in /Users/konstantinkochetov/Other/StudentStuff/Scala2/4/Beleg1_Aufgabe/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-beleg1_aufgabe-build-runtime.xml
 [debug] 	report for default#beleg1_aufgabe-build;0.1-SNAPSHOT test produced in /Users/konstantinkochetov/Other/StudentStuff/Scala2/4/Beleg1_Aufgabe/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-beleg1_aufgabe-build-test.xml
@@ -6547,5 +6547,5 @@
 [debug] 	report for default#beleg1_aufgabe-build;0.1-SNAPSHOT docs produced in /Users/konstantinkochetov/Other/StudentStuff/Scala2/4/Beleg1_Aufgabe/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-beleg1_aufgabe-build-docs.xml
 [debug] 	report for default#beleg1_aufgabe-build;0.1-SNAPSHOT pom produced in /Users/konstantinkochetov/Other/StudentStuff/Scala2/4/Beleg1_Aufgabe/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-beleg1_aufgabe-build-pom.xml
 [debug] 	report for default#beleg1_aufgabe-build;0.1-SNAPSHOT scala-tool produced in /Users/konstantinkochetov/Other/StudentStuff/Scala2/4/Beleg1_Aufgabe/project/target/scala-2.10/sbt-0.13/resolution-cache/reports/default-beleg1_aufgabe-build-scala-tool.xml
-[debug] 	resolve done (849ms resolve - 22ms download)
+[debug] 	resolve done (1367ms resolve - 57ms download)
 [info] Done updating.

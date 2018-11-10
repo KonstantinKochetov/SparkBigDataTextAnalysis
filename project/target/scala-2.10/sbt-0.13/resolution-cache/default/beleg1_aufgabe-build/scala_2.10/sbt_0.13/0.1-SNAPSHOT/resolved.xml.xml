@@ -4,7 +4,7 @@
 		module="beleg1_aufgabe-build"
 		revision="0.1-SNAPSHOT"
 		status="integration"
-		publication="20181101125338"
+		publication="20181110160720"
 		e:sbtVersion="0.13" e:scalaVersion="2.10"
 	>
 		<description>

@@ -1,10 +1,12 @@
 /.idea
 /.cache*
-/.settings*
-/.worksheet*
+/.settings
+/.worksheet
+/target
 
 
 .idea
 .cache*
-.settings*
-.worksheet*
+.settings
+.worksheet
+target
