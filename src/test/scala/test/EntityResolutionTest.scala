@@ -34,8 +34,6 @@ class EntityResolutionTest extends FunSuite with BeforeAndAfterAll {
 
     sc = new SparkContext(conf)
     entityResolution = new EntityResolution(sc, dat1, dat2, stopwordsFile, goldStandardFile)
-
-
   }
 
   test("Initialization Test") {
@@ -143,9 +141,7 @@ class EntityResolutionTest extends FunSuite with BeforeAndAfterAll {
     //val res= entityResolution.idfDict.collectAsMap.toMap
     assert(entityResolution.idfDict.size === 4772)
     //entityResolution.idfDict.takeOrdered(10)(Ordering.by[(String,Double),Double](_._2)).foreach(println)
-
   }
-
 
   test("Test TF IDF-Caluclation") {
 
@@ -187,13 +183,13 @@ class EntityResolutionTest extends FunSuite with BeforeAndAfterAll {
       assert(Math.abs(res-0.0577243382163)<0.000001)
     }
 
-//    test("Test Simple Similarity Calculation"){
-//
-//      val sim= entityResolution.simpleSimimilarityCalculation
-//      val res= entityResolution.findSimilarity("b000o24l3q", "http://www.google.com/base/feeds/snippets/17242822440574356561",sim)
-//      println(res)
-//      assert(Math.abs(res-0.000303171940451)<0.000001)
-//    }
+    test("Test Simple Similarity Calculation"){
+
+      val sim= entityResolution.simpleSimimilarityCalculation
+      val res= entityResolution.findSimilarity("b000o24l3q", "http://www.google.com/base/feeds/snippets/17242822440574356561",sim)
+      println(res)
+      assert(Math.abs(res-0.000303171940451)<0.000001)
+    }
 
     test("Test Simple Similarity Calculation with Broadcast"){
 
@@ -203,14 +199,14 @@ class EntityResolutionTest extends FunSuite with BeforeAndAfterAll {
       assert(Math.abs(res-0.000303171940451)<0.000001)
     }
   //
-  //  test("Evaluate Model"){
-  //
-  //    val (dupCount, avgSDups, avgSNonDups)= entityResolution.evaluateModel(entityResolution.goldStandard)
-  //
-  //    assert(dupCount===146)
-  //    assert(Math.abs(avgSDups-0.264332573435)<0.0000001)
-  //    assert(Math.abs(avgSNonDups-0.00123476304656)<0.0000001)
-  //  }
+    test("Evaluate Model"){
+
+      val (dupCount, avgSDups, avgSNonDups)= entityResolution.evaluateModel(entityResolution.goldStandard)
+
+      assert(dupCount===146)
+      assert(Math.abs(avgSDups-0.264332573435)<0.0000001)
+      assert(Math.abs(avgSNonDups-0.00123476304656)<0.0000001)
+    }
 
   override protected def afterAll() {
 

@@ -1,8 +1,8 @@
 package textanalyse
 
-import org.apache.spark.rdd.RDD
-import org.apache.spark.{Accumulator, SparkContext}
+import org.apache.spark.SparkContext
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.rdd.RDD
 
 class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFile: String, goldStandardFile: String) {
 
@@ -101,14 +101,14 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
      * Speichern des Dictionaries in die Variable idfDict
      */
 
-    //    val size = corpusRDD.count()
-    //    val wordHowManyTimesHappenInDoc1 = allWordsWithoutDubplicates.groupBy(x => x)
-    //    val wordHowManyTimesHappen2 = wordHowManyTimesHappen1.map(x => (x._1, x._2.size))
-    //    val result = wordHowManyTimesHappen2.map(x => (x._1, x._2.toDouble / size.toDouble))
-    //    val checkresult = wordHowManyTimesHappen1.collect()
-    //    val checkresult2 = wordHowManyTimesHappen2.collect()
-    //    val checkresult3 = result.collect()
-    //    idfDict = result.collect().toMap
+//        val size = corpusRDD.count()
+//        val wordHowManyTimesHappenInDoc1 = allWordsWithoutDubplicates.groupBy(x => x)
+//        val wordHowManyTimesHappen2 = wordHowManyTimesHappen1.map(x => (x._1, x._2.size))
+//        val result = wordHowManyTimesHappen2.map(x => (x._1, x._2.toDouble / size.toDouble))
+//        val checkresult = wordHowManyTimesHappen1.collect()
+//        val checkresult2 = wordHowManyTimesHappen2.collect()
+//        val checkresult3 = result.collect()
+//        idfDict = result.collect().toMap
 
     val corp = this.corpusRDD
     val size = this.corpusRDD.count()
@@ -142,7 +142,7 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
     // cartesianRDD: RDD of ((b000jz4hqo,clickart 950 000 - premier image pack (dvd-rom)  "broderbund"),(http://www.google.com/base/feeds/snippets/11448761432933644608,spanish vocabulary builder "expand your vocabulary! contains fun lessons that both teach and entertain you'll quickly find yourself mastering new terms. includes games and more!" ))
     val _amazonRDD = amazonRDD
     val _googleRDD = googleRDD
-    val _computeSimilarity = EntityResolution.computeSimilarity(_:((String, String), (String, String)), _:Map[String, Double], _: Set[String] )
+    val _computeSimilarity = EntityResolution.computeSimilarity(_: ((String, String), (String, String)), _: Map[String, Double], _: Set[String])
     val _stopWords = stopWords
     val _idfDict = idfDict
     val cartesianRDD = _amazonRDD.cartesian(_googleRDD)
@@ -151,7 +151,7 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
       _computeSimilarity(x, _idfDict, _stopWords)
     })
 
-//    val temp = result.collect()
+    //    val temp = result.collect()
     result
   }
 
@@ -170,10 +170,25 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
 
   def simpleSimimilarityCalculationWithBroadcast: RDD[(String, String, Double)] = {
 
+    // amazonRDD: RDD of (b000jz4hqo,clickart 950 000 - premier image pack (dvd-rom)  "broderbund")
+    // googleRDD: RDD of (http://www.google.com/base/feeds/snippets/11448761432933644608,spanish vocabulary builder "expand your vocabulary! contains fun lessons that both teach and entertain you'll quickly find yourself mastering new terms. includes games and more!" )
+    // cartesianRDD: RDD of ((b000jz4hqo,clickart 950 000 - premier image pack (dvd-rom)  "broderbund"),(http://www.google.com/base/feeds/snippets/11448761432933644608,spanish vocabulary builder "expand your vocabulary! contains fun lessons that both teach and entertain you'll quickly find yourself mastering new terms. includes games and more!" ))
+    val _sc = sc
+    val _amazonRDD = amazonRDD
+    val _googleRDD = googleRDD
+    val _computeSimilarity = EntityResolution.computeSimilarityWithBroadcast(_: ((String, String), (String, String)), _: Broadcast[Map[String, Double]], _: Set[String])
+    val _stopWords = stopWords
+    val _idfDict = idfDict
+    val idfBroadcast = sc.broadcast(_idfDict)
+    val cartesianRDD = _amazonRDD.cartesian(_googleRDD)
 
+    val result = cartesianRDD.map(x => {
+      _computeSimilarity(x, idfBroadcast, _stopWords)
+    })
 
+    //        val temp = result.collect()
+    result
 
-    ???
   }
 
   /*
@@ -181,21 +196,86 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
    * 	Gold Standard Evaluation
    */
 
-  def evaluateModel(goldStandard: RDD[(String, String)]): (Long, Double, Double) = {
+  //  def evaluateModel(goldStandard: RDD[(String, String)]): (Long, Double, Double) = {
+  //
+  //    /*
+  //     * Berechnen Sie die folgenden Kennzahlen:
+  //     *
+  //     * Anzahl der Duplikate im Sample
+  //     * Durchschnittliche Consinus Similaritaet der Duplikate
+  //     * Durchschnittliche Consinus Similaritaet der Nicht-Duplikate
+  //     *
+  //     *
+  //     * Ergebnis-Tripel:
+  //     * (AnzDuplikate, avgCosinus-SimilaritätDuplikate,avgCosinus-SimilaritätNicht-Duplikate)
+  //     */
+  //
+  //    // goldStandard: RDD (1300 elements) of (b00004tkvy http://www.google.com/base/feeds/snippets/18441110047404795849,gold) // without comma, one string
+  //
+  //    val rddGoldSplitted = goldStandard.map(x => {
+  //      val e = x._1.split(" ")
+  //      (e(0), e(1))
+  //    })
+  //
+  //    val _amazonRDD = amazonRDD
+  //    val _googleRDD = googleRDD
+  //    val cartesianRDD = _amazonRDD.cartesian(_googleRDD)
+  //    val cartesianRDD2 = cartesianRDD.map(x => (x._1._1, x._2._1))
+  //
+  //    val temp1 = cartesianRDD2.subtract(goldStandard).collect()
+  //???
+  //  }
+
+  def evaluateModel(goldStandard: RDD[(String, String)]): (Long, Double, Double) = { //fare anche qua con cartesisches produkt spark
 
     /*
      * Berechnen Sie die folgenden Kennzahlen:
-     * 
+     *
      * Anzahl der Duplikate im Sample
      * Durchschnittliche Consinus Similaritaet der Duplikate
      * Durchschnittliche Consinus Similaritaet der Nicht-Duplikate
-     * 
-     * 
+     *
+     *
      * Ergebnis-Tripel:
      * (AnzDuplikate, avgCosinus-SimilaritätDuplikate,avgCosinus-SimilaritätNicht-Duplikate)
      */
 
-    ???
+    val joinedDocumentsSimilarities = simpleSimimilarityCalculation.map(x => (x._1 + " " + x._2, x._3))
+      .leftOuterJoin(goldStandard)
+
+    //ACCUMULATORS:
+    val plagiarismSim = sc.doubleAccumulator("plagSim")
+    val plagiarismCount = sc.longAccumulator("plagCount")
+
+    val notPlagiarismSim = sc.doubleAccumulator("notPlagSim")
+    val notPlagiarismCount = sc.doubleAccumulator("notPlagCount")
+
+    joinedDocumentsSimilarities.foreach(x =>
+      x match {
+        case (x, (y, Some(z))) => plagiarismSim.add(y); plagiarismCount.add(1)
+        case (x, y) => notPlagiarismSim.add(y._1); notPlagiarismCount.add(1)
+      })
+
+    val res = (plagiarismCount.value.toLong, plagiarismSim.value / plagiarismCount.value, notPlagiarismSim.value / notPlagiarismCount.value)
+    res //(146, 0.22603425561949433, 0.0012149319829381333)
+
+//    val dups = joinedDocumentsSimilarities.filter(x => {
+//      x._2._2 match {
+//        case None => false
+//        case _=> true
+//      }
+//    })
+//
+//    val noDups = joinedDocumentsSimilarities.filter(x => {
+//      x._2._2 match {
+//        case None => true
+//        case _=> false
+//      }
+//    })
+//
+//    val res2 = (dups.count(), dups.map(x => x._2._1).mean(), noDups.map(x => x._2._1).mean())
+//
+//    res2 //(146, 0.22603425561949433, 0.0012149319829381333)
   }
 }
 
@@ -241,13 +321,13 @@ object EntityResolution {
      * Sie die erforderlichen Parameter extrahieren
      */
 
-//      val one = calculateDocumentSimilarity(record._1._1, record._1._2, idfDictionary, stopWords)
-//      val two = calculateDocumentSimilarity(record._2._1, record._2._2, idfDictionary, stopWords)
-//      if (one >= two) {
-//        (record._1._1, record._1._2, one)
-//      } else {
-//        (record._2._1, record._2._2, two)
-//      }
+    //      val one = calculateDocumentSimilarity(record._1._1, record._1._2, idfDictionary, stopWords)
+    //      val two = calculateDocumentSimilarity(record._2._1, record._2._2, idfDictionary, stopWords)
+    //      if (one >= two) {
+    //        (record._1._1, record._1._2, one)
+    //      } else {
+    //        (record._2._1, record._2._2, two)
+    //      }
 
     // amazonRDD: RDD of (b000jz4hqo,clickart 950 000 - premier image pack (dvd-rom)  "broderbund")
     // googleRDD: RDD of (http://www.google.com/base/feeds/snippets/11448761432933644608,spanish vocabulary builder "expand your vocabulary! contains fun lessons that both teach and entertain you'll quickly find yourself mastering new terms. includes games and more!" )
@@ -271,14 +351,17 @@ object EntityResolution {
     //
     //    temp0
 
-    val tf = getTermFrequencies(terms).toList
-    val tfwords = tf.map(x => x._1).toList
+    // meine lösung
+//    val tf = getTermFrequencies(terms).toList // List: (customizing,0.16666666666666666), (2007,0.16666666666666666), ...
+//    val tfwords = tf.map(x => x._1).toList // List: "customizing", "2007", ...
+//    // idfDictionary: HashMap: (serious,400.0), (boutiques,400.0), (breaks,400.0)
+//
+//    val temp = idfDictionary.map(x => if (tfwords.contains(x._1)) (x._1, x._2 * tf.find(z => z._1 == x._1).get._2) else (x._1, x._2 * 0)) // HashMap: (customizing,16.666666666666664), (2007,3.5087719298245617), ...
+//    val result = temp.filter(_._2 != 0)
+//    result // HashMap: (customizing,16.666666666666664), (2007,3.5087719298245617), (interface,3.0303030303030303)...
 
-    val ret = idfDictionary
-      .map(x => if (tfwords.contains(x._1)) (x._1, x._2 * tf.find(z => z._1 == x._1).get._2) else (x._1, x._2 * 0))
-      .filter(_._2 != 0)
-    ret
-
+  // corina lösung
+    getTermFrequencies(terms).map(tf => (tf._1, tf._2 * idfDictionary(tf._1)))
   }
 
   def calculateDotProduct(v1: Map[String, Double], v2: Map[String, Double]): Double = {
@@ -286,9 +369,18 @@ object EntityResolution {
     /*
      * Berechnung des Dot-Products von zwei Vectoren
      */
-    val keys = v1.keys.toSet.union(v2.keys.toSet)
-    val products = keys.map(k => v1.getOrElse(k, 0.0) * v2.getOrElse(k, 0.0))
-    products.sum
+
+    // meine Lösung
+//    val keys = v1.keys.toSet.union(v2.keys.toSet)
+//    val products = keys.map(k => v1.getOrElse(k, 0.0) * v2.getOrElse(k, 0.0))
+//    products.sum
+
+    // andrej
+//    v1.keys.toSet.intersect(v2.keys.toSet).map(key => v1(key) * v2(key)).sum
+
+    // andrej 2
+
+      v1.map { case (k, v) => (k, v * v2.getOrElse(k, .0)) }.values.sum
   }
 
   def calculateNorm(vec: Map[String, Double]): Double = {
@@ -335,6 +427,10 @@ object EntityResolution {
      * Sie die erforderlichen Parameter extrahieren
      * Verwenden Sie die Broadcast-Variable.
      */
-    ???
+
+    // idfDictionary: Map[String, Double]
+    val result = (record._1._1, record._2._1, calculateDocumentSimilarity(record._1._2, record._2._2, idfBroadcast.value, stopWords))
+    result
+
   }
 }
