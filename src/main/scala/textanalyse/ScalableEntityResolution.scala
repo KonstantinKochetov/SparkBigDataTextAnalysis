@@ -117,7 +117,14 @@ class ScalableEntityResolution(sc: SparkContext, dat1: String, dat2: String, sto
      * Speichern Sie das Ergebnis in der Variable simsFillValuesRDD und cachen sie diese.
      */
 
-    ???
+    val _amazonWeightsBroadcastRDD = amazonWeightsBroadcast
+    val _googleWeightsBroadcastRDD = googleWeightsBroadcast
+    val _amazonNormsBroadcast = amazonNormsBroadcast
+    val _googleNormsBroadcast = googleNormsBroadcast
+
+    val _commonsTokens = commonTokens
+
+    commonTokens.map(x => ScalableEntityResolution.fastCosinusSimilarity(x, _amazonWeightsBroadcastRDD, _googleWeightsBroadcastRDD, _amazonNormsBroadcast, _amazonNormsBroadcast))
   }
 
   /*
@@ -300,7 +307,13 @@ object ScalableEntityResolution {
     die auch in der gemeinsamen Token-Liste sind
     */
 
-    ???
+      val dot = EntityResolution.calculateDotProduct(_: Map[String, Double], _: Map[String, Double])
+      val aID = record._1._1
+      val gID = record._1._2
+      val dotProduct = dot(amazonWeightsBroad.value(aID), googleWeightsBroad.value(gID))
+      val normMult = amazonNormsBroad.value(aID) * googleNormsBroad.value(gID)
+
+      ((aID, gID), dotProduct / normMult)
   }
 
   def gs_value(record: (_, (_, Option[Double]))): Double = {

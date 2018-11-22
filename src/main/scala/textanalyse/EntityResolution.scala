@@ -93,7 +93,6 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
 
   }
 
-  // TODO: возможна ошибка
   def calculateIDF = {
 
     /*
