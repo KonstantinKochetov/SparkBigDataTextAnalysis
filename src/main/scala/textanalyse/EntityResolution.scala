@@ -28,8 +28,7 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
 
     // data (after collect()): Tuple[]: 0: _1 "b0006z" _2 "clickart 9500...", 1: ...
     val _stopWords = stopWords
-    val _tokenize = EntityResolution.tokenize(_: String, _: Set[String])
-    val temp = data.map(x => (x._1, _tokenize(x._2, _stopWords)))
+    val temp = data.map(x => (x._1, EntityResolution.tokenize(x._2, _stopWords)))
     //val checkresult = temp.collect()
     temp
   }
@@ -79,6 +78,9 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
     val temp3 = temp2.map(x => (x._1, x._2))
     temp3.first()
 
+//    /**/
+    // data.sortBy(data => -data._2.size).first
+/**/
   }
 
   def createCorpus = {
@@ -241,40 +243,40 @@ class EntityResolution(sc: SparkContext, dat1: String, dat2: String, stopwordsFi
 
     val joinedDocumentsSimilarities = simpleSimimilarityCalculation.map(x => (x._1 + " " + x._2, x._3))
       .leftOuterJoin(goldStandard)
-
-    //ACCUMULATORS:
-    val plagiarismSim = sc.doubleAccumulator("plagSim")
-    val plagiarismCount = sc.longAccumulator("plagCount")
-
-    val notPlagiarismSim = sc.doubleAccumulator("notPlagSim")
-    val notPlagiarismCount = sc.doubleAccumulator("notPlagCount")
-
-    joinedDocumentsSimilarities.foreach(x =>
-      x match {
-        case (x, (y, Some(z))) => plagiarismSim.add(y); plagiarismCount.add(1)
-        case (x, y) => notPlagiarismSim.add(y._1); notPlagiarismCount.add(1)
-      })
-
-    val res = (plagiarismCount.value.toLong, plagiarismSim.value / plagiarismCount.value, notPlagiarismSim.value / notPlagiarismCount.value)
-    res //(146, 0.22603425561949433, 0.0012149319829381333)
-
-//    val dups = joinedDocumentsSimilarities.filter(x => {
-//      x._2._2 match {
-//        case None => false
-//        case _=> true
-//      }
-//    })
 //
-//    val noDups = joinedDocumentsSimilarities.filter(x => {
-//      x._2._2 match {
-//        case None => true
-//        case _=> false
-//      }
-//    })
+//    //ACCUMULATORS:
+//    val plagiarismSim = sc.doubleAccumulator("plagSim")
+//    val plagiarismCount = sc.longAccumulator("plagCount")
 //
-//    val res2 = (dups.count(), dups.map(x => x._2._1).mean(), noDups.map(x => x._2._1).mean())
+//    val notPlagiarismSim = sc.doubleAccumulator("notPlagSim")
+//    val notPlagiarismCount = sc.doubleAccumulator("notPlagCount")
 //
-//    res2 //(146, 0.22603425561949433, 0.0012149319829381333)
+//    joinedDocumentsSimilarities.foreach(x =>
+//      x match {
+//        case (x, (y, Some(z))) => plagiarismSim.add(y); plagiarismCount.add(1)
+//        case (x, y) => notPlagiarismSim.add(y._1); notPlagiarismCount.add(1)
+//      })
+//
+//    val res = (plagiarismCount.value.toLong, plagiarismSim.value / plagiarismCount.value, notPlagiarismSim.value / notPlagiarismCount.value)
+//    res //(146, 0.22603425561949433, 0.0012149319829381333)
+
+    val dups = joinedDocumentsSimilarities.filter(x => {
+      x._2._2 match {
+        case None => false
+        case _=> true
+      }
+    })
+
+    val noDups = joinedDocumentsSimilarities.filter(x => {
+      x._2._2 match {
+        case None => true
+        case _=> false
+      }
+    })
+
+    val res2 = (dups.count(), dups.map(x => x._2._1).mean(), noDups.map(x => x._2._1).mean())
+
+    res2 //(146, 0.22603425561949433, 0.0012149319829381333)
   }
 }
 
@@ -350,7 +352,7 @@ object EntityResolution {
     //
     //    temp0
 
-    // meine lösung
+    // erste lösung
 //    val tf = getTermFrequencies(terms).toList // List: (customizing,0.16666666666666666), (2007,0.16666666666666666), ...
 //    val tfwords = tf.map(x => x._1).toList // List: "customizing", "2007", ...
 //    // idfDictionary: HashMap: (serious,400.0), (boutiques,400.0), (breaks,400.0)
@@ -359,7 +361,7 @@ object EntityResolution {
 //    val result = temp.filter(_._2 != 0)
 //    result // HashMap: (customizing,16.666666666666664), (2007,3.5087719298245617), (interface,3.0303030303030303)...
 
-  // corina lösung
+  // zweite lösung
     getTermFrequencies(terms).map(tf => (tf._1, tf._2 * idfDictionary(tf._1)))
   }
 
@@ -369,16 +371,15 @@ object EntityResolution {
      * Berechnung des Dot-Products von zwei Vectoren
      */
 
-    // meine Lösung
+    // erste Lösung
 //    val keys = v1.keys.toSet.union(v2.keys.toSet)
 //    val products = keys.map(k => v1.getOrElse(k, 0.0) * v2.getOrElse(k, 0.0))
 //    products.sum
 
-    // andrej
+    // zweite lösung
 //    v1.keys.toSet.intersect(v2.keys.toSet).map(key => v1(key) * v2(key)).sum
 
-    // andrej 2
-
+    // dritte 2
       v1.map { case (k, v) => (k, v * v2.getOrElse(k, .0)) }.values.sum
   }
 

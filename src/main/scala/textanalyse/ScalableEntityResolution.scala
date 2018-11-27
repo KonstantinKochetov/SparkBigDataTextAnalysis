@@ -83,6 +83,7 @@ class ScalableEntityResolution(sc: SparkContext, dat1: String, dat2: String, sto
     googleInvPairsRDD = googleWeightsRDD.map(x => ScalableEntityResolution.invert(x)).flatMap(list => list).cache() // Tuple[]: ("2007","http://www.google.com/base/feeds/snippets/11125907881740407428"), ("quickbooks","http://www.google.com/base/feeds/snippets/11125907881740407428")
   }
 
+  // TODO: смотри фотки 22.11.2018
   def determineCommonTokens: Unit = {
 
     /*
@@ -293,6 +294,7 @@ object ScalableEntityResolution {
     (el._2, el._1)
   }
 
+  // TODO: фото
   def fastCosinusSimilarity(record: ((String, String), Iterable[String]),
                             amazonWeightsBroad: Broadcast[Map[String, Map[String, Double]]], googleWeightsBroad: Broadcast[Map[String, Map[String, Double]]],
                             amazonNormsBroad: Broadcast[Map[String, Double]], googleNormsBroad: Broadcast[Map[String, Double]]): ((String, String), Double) = {
